@@ -84,7 +84,7 @@ private fun EngineCard(ev: EngineView, voices: List<VoiceInfo>, tasks: Map<Strin
     val e = ev.engine
     SectionCard(e.displayName, e.description) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            StateChip(ev.status.state)
+            StateChip(if (ev.lastError != null) EngineState.ERROR else ev.status.state)
             Text(ev.lastError?.let { "载入失败：$it" } ?: ev.status.message, style = MaterialTheme.typography.bodySmall,
                 color = if (ev.lastError != null) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant)
         }

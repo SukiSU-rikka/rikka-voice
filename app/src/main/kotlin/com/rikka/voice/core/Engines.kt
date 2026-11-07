@@ -127,7 +127,7 @@ object Engines {
                                 }
                             } catch (t: Throwable) {
                                 Log.w(TAG, "load ${e.id}", t)
-                                errors[e.id] = t.message ?: t.toString()
+                                errors[e.id] = explain(t)
                             }
                         }
                     }
@@ -139,6 +139,18 @@ object Engines {
                     publish(); _loading.value = false
                 }
             }
+        }
+    }
+
+    /** 把常见的底层错误翻译成人话。 */
+    fun explain(t: Throwable): String {
+        val raw = "${t.javaClass.simpleName}: ${t.message ?: ""}"
+        return when (t) {
+            is NoSuchFieldError, is NoSuchMethodError ->
+                "引擎库和代码对不上（$raw）。通常是打包时开了混淆，或 jar 与 .so 版本不一致——见构建说明“常见错误”"
+            is UnsatisfiedLinkError -> "缺少原生库（$raw）。检查 jniLibs/arm64-v8a 里的 .so"
+            is OutOfMemoryError -> "内存不足：声音包太多或线程太多，试试在“关于”页减少线程"
+            else -> t.message ?: raw
         }
     }
 

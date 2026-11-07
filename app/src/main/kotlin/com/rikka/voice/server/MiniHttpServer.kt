@@ -43,8 +43,13 @@ class MiniHttpServer(private val port: Int, private val handler: (HttpRequest) -
 
     fun start() {
         val ss = ServerSocket()
-        ss.reuseAddress = true
-        ss.bind(InetSocketAddress(InetAddress.getByName("127.0.0.1"), port), 32)
+        try {
+            ss.reuseAddress = true
+            ss.bind(InetSocketAddress(InetAddress.getLoopbackAddress(), port), 32)
+        } catch (e: Exception) {
+            runCatching { ss.close() }
+            throw e
+        }
         socket = ss; running = true
         Thread({
             while (running) {

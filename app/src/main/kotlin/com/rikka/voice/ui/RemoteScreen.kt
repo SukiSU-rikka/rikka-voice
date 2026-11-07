@@ -48,7 +48,7 @@ fun RemoteScreen(modifier: Modifier) {
             val cfg = Engines.prefs.remotes.firstOrNull { "remote:" + it.id == ev.engine.id } ?: return@forEach
             SectionCard(ev.engine.displayName, ev.engine.description) {
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    StateChip(ev.status.state)
+                    StateChip(if (ev.lastError != null) com.rikka.voice.core.EngineState.ERROR else ev.status.state)
                     Text(ev.lastError ?: "${cfg.base} · ${ev.voices} 个声音", style = MaterialTheme.typography.bodySmall,
                         color = if (ev.lastError != null) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant)
                 }

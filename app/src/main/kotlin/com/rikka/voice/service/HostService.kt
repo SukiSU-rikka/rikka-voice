@@ -56,8 +56,17 @@ class HostService : Service() {
                 _state.value = "http://127.0.0.1:$port"; _error.value = null
             } catch (e: Exception) {
                 Log.e("RikkaHost", "server start failed", e)
-                _error.value = "端口 $port 被占用或无法监听：${e.message}"
+                val m = e.message ?: e.toString()
+                _error.value = when {
+                    "EPERM" in m || "EACCES" in m || "Permission" in m ->
+                        "系统不允许六花声库使用网络（$m）。请到 设置 → 应用 → 六花声库 → 流量/联网，把 WLAN 和移动数据都打开；" +
+                            "如果装了防火墙类模块（AFWall+、NetGuard、AdGuard 根模式等），也要放行六花声库。改完回来再打开开关。"
+                    "EADDRINUSE" in m || "in use" in m -> "端口 $port 已被别的 App 占用（$m）。如果手机上装了别的 VOICEVOX 类 App，先关掉它。"
+                    else -> "本机接口启动失败：$m"
+                }
                 _state.value = null
+                stopForeground(STOP_FOREGROUND_REMOVE); stopSelf()
+                return START_NOT_STICKY
             }
         }
         return START_STICKY
