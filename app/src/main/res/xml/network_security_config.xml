@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 需要用 HTTP 连接同一 Wi-Fi 下电脑上的 AivisSpeech / VOICEVOX / Style-Bert-VITS2 / GPT-SoVITS -->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="true">
+        <trust-anchors><certificates src="system" /></trust-anchors>
+    </base-config>
+</network-security-config>

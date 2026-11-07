@@ -1,0 +1,39 @@
+{
+  "_说明": "模型下载清单。地址失效时只改这里；也可以在电脑上下载好，再在 App 里用“导入”。",
+  "openjtalk": {
+    "title": "OpenJTalk 日语词典",
+    "note": "VOICEVOX 和 piper-plus 都靠它把汉字转成读音，必装。",
+    "url": "https://github.com/r9y9/open_jtalk/releases/download/v1.11.1/open_jtalk_dic_utf_8-1.11.tar.gz",
+    "size": "约 23 MB（解压后约 100 MB）",
+    "target": "open_jtalk_dic_utf_8-1.11"
+  },
+  "voicevox_vvm": {
+    "urlPattern": "https://github.com/VOICEVOX/voicevox_vvm/releases/latest/download/{file}",
+    "terms": "https://voicevox.hiroshiba.jp/",
+    "items": [
+      { "file": "0.vvm",  "chars": "四国めたん・ずんだもん・春日部つむぎ・雨晴はう" },
+      { "file": "3.vvm",  "chars": "波音リツ 等" },
+      { "file": "4.vvm",  "chars": "玄野武宏 等" },
+      { "file": "6.vvm",  "chars": "No.7（含“读み聞かせ”朗读风格）等" },
+      { "file": "11.vvm", "chars": "櫻歌ミコ 等" },
+      { "file": "13.vvm", "chars": "春歌ナナ・猫使アル 等" },
+      { "file": "14.vvm", "chars": "栗田まろん・満別花丸・琴詠ニア 等" },
+      { "file": "15.vvm", "chars": "小夜/SAYO・ずんだもん（追加风格）等" },
+      { "file": "21.vvm", "chars": "東北イタコ・猫使アル（追加风格）等" }
+    ]
+  },
+  "supertonic": {
+    "title": "Supertonic 3（31 语种，含日语）",
+    "note": "sherpa-onnx 官方转换的 int8 版本，速度快、体积小。",
+    "url": "https://github.com/k2-fsa/sherpa-onnx/releases/download/tts-models/sherpa-onnx-supertonic-3-tts-int8-2026-05-11.tar.bz2",
+    "size": "",
+    "target": "supertonic-3"
+  },
+  "piper_plus": {
+    "title": "piper-plus · つくよみちゃん",
+    "note": "MIT 引擎；模型权重另有使用条款（见模型页面）。",
+    "model": "https://huggingface.co/ayousanz/piper-plus-tsukuyomi-chan/resolve/main/tsukuyomi-chan-6lang-fp16.onnx",
+    "config": "https://huggingface.co/ayousanz/piper-plus-tsukuyomi-chan/resolve/main/config.json",
+    "size": "约 40 MB"
+  }
+}
