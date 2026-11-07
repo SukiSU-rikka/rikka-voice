@@ -52,7 +52,7 @@ object Api {
         return arr
     }
 
-    private fun voicesJson(): JSONArray {
+    fun voicesJson(): JSONArray {
         val arr = JSONArray()
         val def = Engines.defaultVoice()?.id
         for (v in Engines.voices.value) arr.put(JSONObject()
@@ -62,13 +62,14 @@ object Api {
         return arr
     }
 
-    private fun info(): JSONObject {
+    fun info(): JSONObject {
         val engines = JSONArray()
         Engines.engines.value.forEach { e ->
             engines.put(JSONObject().put("id", e.engine.id).put("name", e.engine.displayName)
                 .put("state", e.status.state.name).put("message", e.lastError ?: e.status.message).put("voices", e.voices))
         }
         return JSONObject().put("app", "rikka-voice").put("version", BuildConfig.VERSION_NAME)
+            .put("port", com.rikka.voice.service.HostService.port.value ?: JSONObject.NULL)
             .put("defaultSpeaker", Engines.defaultVoice()?.id ?: JSONObject.NULL)
             .put("ready", Engines.engines.value.any { it.status.state == EngineState.READY && it.voices > 0 })
             .put("engines", engines)
@@ -110,6 +111,17 @@ object Api {
         val text = req.query["text"] ?: req.bodyText.takeIf { it.isNotBlank() } ?: return HttpResponse.error(422, "缺少 text")
         val speed = req.query["speed"]?.toFloatOrNull() ?: 1f
         return wav(speakerOf(req), text, SynthParams(speed = speed.coerceIn(.5f, 2f)))
+    }
+
+    /** 解析 /rikka/tts 的 JSON；直连通道（ContentProvider）也用它。 */
+    fun parseTts(o: JSONObject): Triple<Int?, String, SynthParams> {
+        val sp = if (o.has("speaker") && !o.isNull("speaker")) o.optInt("speaker", -1) else -1
+        return Triple(sp, o.optString("text"), SynthParams(
+            speed = o.optDouble("speed", 1.0).toFloat().coerceIn(.5f, 2f),
+            pitch = o.optDouble("pitch", 0.0).toFloat().coerceIn(-.15f, .15f),
+            intonation = o.optDouble("intonation", 1.0).toFloat().coerceIn(0f, 2f),
+            volume = o.optDouble("volume", 1.0).toFloat().coerceIn(0f, 2f),
+        ))
     }
 
     private fun rikkaTts(req: HttpRequest): HttpResponse {

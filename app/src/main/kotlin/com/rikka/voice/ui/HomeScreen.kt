@@ -1,7 +1,6 @@
 package com.rikka.voice.ui
 
 import android.content.Intent
-import android.provider.Settings
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -18,6 +17,7 @@ import androidx.compose.material.icons.rounded.PlayArrow
 import androidx.compose.material.icons.rounded.Stop
 import androidx.compose.material3.Button
 import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -76,28 +76,32 @@ fun HomeScreen(modifier: Modifier, goVoices: () -> Unit) {
             }
         }
 
-        // ── 接口状态 ──
-        SectionCard("本机接口", "六花日语通过它朗读。地址固定为 127.0.0.1:${Engines.prefs.port}，只有这台手机上的 App 能访问。") {
+        // ── 连接状态 ──
+        SectionCard("连接方式") {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Chip("始终可用", MaterialTheme.colorScheme.primaryContainer, MaterialTheme.colorScheme.onPrimaryContainer)
+                Text("六花日语直连通道", fontWeight = FontWeight.Medium)
+            }
+            Hint("六花日语通过系统直接调用六花声库，不开网络端口，不怕后台被清理，也不需要任何白名单。六花一朗读，系统就会自动把这里唤醒。")
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Chip("始终可用", MaterialTheme.colorScheme.primaryContainer, MaterialTheme.colorScheme.onPrimaryContainer)
+                Text("系统朗读引擎", fontWeight = FontWeight.Medium)
+            }
+            OutlinedButton(onClick = { runCatching { ctx.startActivity(Intent("com.android.settings.TTS_SETTINGS")) } }) { Text("设为系统朗读") }
+            HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = .4f))
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Column(Modifier.weight(1f)) {
-                    Text(if (running != null) "运行中 · $running" else "已关闭", fontWeight = FontWeight.Medium,
+                    Text("HTTP 接口（可选）", fontWeight = FontWeight.Medium)
+                    Text(running?.let { "运行中 · $it" } ?: "未开启 · 只有别的 App 要用 VOICEVOX 接口时才需要",
+                        style = MaterialTheme.typography.bodySmall,
                         color = if (running != null) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant)
-                    hostError?.let { Text(it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall) }
                 }
                 Switch(checked = running != null, onCheckedChange = { if (it) HostService.start(ctx) else HostService.stop(ctx) })
             }
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text("开机后自动开启", Modifier.weight(1f))
+            hostError?.let { Hint(it) }
+            if (running != null) Row(verticalAlignment = Alignment.CenterVertically) {
+                Text("开机后自动开启 HTTP 接口", Modifier.weight(1f))
                 Switch(checked = boot, onCheckedChange = { boot = it; Engines.prefs.startOnBoot = it })
-            }
-            Hint("一加 / ColorOS 会清理后台：建议在系统设置里允许六花声库“自启动”和“后台运行”，否则锁屏后接口可能被关掉。")
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                OutlinedButton(onClick = {
-                    runCatching { ctx.startActivity(Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS)) }
-                }) { Text("电池优化") }
-                OutlinedButton(onClick = {
-                    runCatching { ctx.startActivity(Intent("com.android.settings.TTS_SETTINGS")) }
-                }) { Text("设为系统朗读") }
             }
         }
 

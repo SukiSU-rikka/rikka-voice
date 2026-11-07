@@ -53,6 +53,13 @@
                 android:value="Local text-to-speech HTTP endpoint (127.0.0.1) used by the user's own reading app" />
         </service>
 
+        <!-- 直连通道：六花日语不经过网络端口直接调用（见 ApiProvider.kt） -->
+        <provider
+            android:name=".server.ApiProvider"
+            android:authorities="com.rikka.voice.api"
+            android:exported="true"
+            tools:ignore="ExportedContentProvider" />
+
         <!-- 系统 TTS 引擎 -->
         <service
             android:name=".tts.RikkaTtsService"

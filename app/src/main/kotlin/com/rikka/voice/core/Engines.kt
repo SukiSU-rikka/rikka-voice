@@ -45,6 +45,12 @@ object Engines {
     val engines: StateFlow<List<EngineView>> = _engines
     private val _voices = MutableStateFlow<List<VoiceInfo>>(emptyList())
     val voices: StateFlow<List<VoiceInfo>> = _voices
+    @Volatile private var firstLoadDone = false
+    /** 进程刚被拉起时（例如六花通过直连通道唤醒），等第一次声音列表载入完成。 */
+    fun awaitFirstLoad(timeoutMs: Long = 25_000) {
+        val end = System.currentTimeMillis() + timeoutMs
+        while (!firstLoadDone && System.currentTimeMillis() < end) Thread.sleep(50)
+    }
     private val _loading = MutableStateFlow(false)
     val loading: StateFlow<Boolean> = _loading
 
@@ -136,7 +142,7 @@ object Engines {
                     if (_voices.value.none { it.id == prefs.defaultVoice }) _voices.value.firstOrNull()?.let { prefs.defaultVoice = it.id }
                     synchronized(cache) { cache.clear() }
                 } finally {
-                    publish(); _loading.value = false
+                    publish(); _loading.value = false; firstLoadDone = true
                 }
             }
         }

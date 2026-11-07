@@ -30,7 +30,7 @@ class Prefs(ctx: Context) {
     private val sp: SharedPreferences = ctx.getSharedPreferences("rikka_voice", Context.MODE_PRIVATE)
 
     var serverEnabled: Boolean
-        get() = sp.getBoolean("server", true)
+        get() = sp.getBoolean("server", false)
         set(v) = sp.edit().putBoolean("server", v).apply()
 
     var startOnBoot: Boolean

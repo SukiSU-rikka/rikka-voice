@@ -48,7 +48,7 @@ class MainActivity : ComponentActivity() {
     /** rikkavoice://start（六花日语唤起）或用户之前开着接口 → 启动接口。 */
     private fun handleIntent(i: Intent?) {
         val fromRikka = i?.data?.scheme == "rikkavoice"
-        if (fromRikka || Engines.prefs.serverEnabled) runCatching { HostService.start(this) }
+        if (Engines.prefs.serverEnabled) runCatching { HostService.start(this) }
         if (fromRikka && i?.data?.getQueryParameter("back") == "1") moveTaskToBack(true)
     }
 }

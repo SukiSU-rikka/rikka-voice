@@ -30,6 +30,10 @@ class HostService : Service() {
         val state: StateFlow<String?> = _state
         private val _error = MutableStateFlow<String?>(null)
         val error: StateFlow<String?> = _error
+        private val _port = MutableStateFlow<Int?>(null)
+        val port: StateFlow<Int?> = _port
+        /** 依次尝试的端口；六花那边按同样顺序探测。 */
+        val PORTS = listOf(50021, 50031, 52021, 38021, 18021)
 
         fun start(ctx: Context) {
             Engines.prefs.serverEnabled = true
@@ -50,25 +54,25 @@ class HostService : Service() {
         if (intent?.action == ACTION_STOP) { stop(this); return START_NOT_STICKY }
         startInForeground()
         if (server?.running != true) {
-            val port = Engines.prefs.port
-            try {
-                server = MiniHttpServer(port) { Api.handle(it) }.also { it.start() }
-                _state.value = "http://127.0.0.1:$port"; _error.value = null
-            } catch (e: Exception) {
-                Log.e("RikkaHost", "server start failed", e)
-                val m = e.message ?: e.toString()
-                _error.value = when {
-                    "EPERM" in m || "EACCES" in m || "Permission" in m ->
-                        "系统不允许六花声库使用网络（$m）。请到 设置 → 应用 → 六花声库 → 流量/联网，把 WLAN 和移动数据都打开；" +
-                            "如果装了防火墙类模块（AFWall+、NetGuard、AdGuard 根模式等），也要放行六花声库。改完回来再打开开关。"
-                    "EADDRINUSE" in m || "in use" in m -> "端口 $port 已被别的 App 占用（$m）。如果手机上装了别的 VOICEVOX 类 App，先关掉它。"
-                    else -> "本机接口启动失败：$m"
+            var lastErr: Exception? = null
+            for (p in (listOf(Engines.prefs.port) + PORTS).distinct()) {
+                try {
+                    server = MiniHttpServer(p) { Api.handle(it) }.also { it.start() }
+                    _state.value = "http://127.0.0.1:$p"; _port.value = p; _error.value = null
+                    lastErr = null
+                    break
+                } catch (e: Exception) {
+                    Log.w("RikkaHost", "port $p failed: ${e.message}")
+                    lastErr = e
                 }
-                _state.value = null
+            }
+            if (lastErr != null) {
+                _state.value = null; _port.value = null
+                _error.value = "这台手机的系统不允许普通 App 开本机端口（${lastErr.message}）。" +
+                    "不影响六花日语：它走“直连通道”，不需要端口；系统朗读也照常可用。只有别的 App 想用 HTTP 接口时才需要端口。"
                 stopForeground(STOP_FOREGROUND_REMOVE); stopSelf()
                 return START_NOT_STICKY
             }
-        }
         return START_STICKY
     }
 
@@ -96,7 +100,7 @@ class HostService : Service() {
 
     override fun onDestroy() {
         server?.stop(); server = null
-        _state.value = null
+        _state.value = null; _port.value = null
         super.onDestroy()
     }
 }
