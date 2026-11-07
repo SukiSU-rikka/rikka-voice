@@ -21,8 +21,8 @@ jobs:
           unzip -qo /tmp/core.zip -d /tmp/core
           find /tmp/core -name "libvoicevox_core.so" -exec cp {} app/src/main/jniLibs/arm64-v8a/ \;
           curl -sL -o /tmp/ort.tgz https://github.com/VOICEVOX/onnxruntime-builder/releases/download/voicevox_onnxruntime-1.23.2/voicevox_onnxruntime-android-arm64-1.23.2.tgz
-          tar -xzf /tmp/ort.tgz -C /tmp
-          find /tmp -name "libvoicevox_onnxruntime.so*" -exec cp {} app/src/main/jniLibs/arm64-v8a/libvoicevox_onnxruntime.so \;
+          mkdir -p /tmp/ort && tar -xzf /tmp/ort.tgz -C /tmp/ort
+          find /tmp/ort -name "libvoicevox_onnxruntime.so*" -exec cp {} app/src/main/jniLibs/arm64-v8a/libvoicevox_onnxruntime.so \;
           test -f app/src/main/jniLibs/arm64-v8a/libvoicevox_core.so
           test -f app/src/main/jniLibs/arm64-v8a/libvoicevox_onnxruntime.so
           curl -sL -o /tmp/sherpa.aar https://github.com/k2-fsa/sherpa-onnx/releases/download/v1.13.8/sherpa-onnx-1.13.8.aar
