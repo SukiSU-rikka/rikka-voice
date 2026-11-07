@@ -25,6 +25,12 @@ jobs:
           find /tmp/ort -name "libvoicevox_onnxruntime.so*" -exec cp {} app/src/main/jniLibs/arm64-v8a/libvoicevox_onnxruntime.so \;
           test -f app/src/main/jniLibs/arm64-v8a/libvoicevox_core.so
           test -f app/src/main/jniLibs/arm64-v8a/libvoicevox_onnxruntime.so
+          unzip -qo /tmp/sherpa.aar "jni/arm64-v8a/libc++_shared.so" -d /tmp/sherpa_x || true
+          find /tmp/sherpa_x -name "libc++_shared.so" -exec cp {} app/src/main/jniLibs/arm64-v8a/ \; || true
+          if [ ! -f app/src/main/jniLibs/arm64-v8a/libc++_shared.so ]; then
+            cp $(ls $ANDROID_HOME/ndk/*/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/aarch64-linux-android/libc++_shared.so | head -1) app/src/main/jniLibs/arm64-v8a/
+          fi
+          test -f app/src/main/jniLibs/arm64-v8a/libc++_shared.so
           curl -sL -o /tmp/sherpa.aar https://github.com/k2-fsa/sherpa-onnx/releases/download/v1.13.8/sherpa-onnx-1.13.8.aar
           cp /tmp/sherpa.aar app/libs/sherpa-onnx.aar
           ls -la app/src/main/jniLibs/arm64-v8a app/libs
