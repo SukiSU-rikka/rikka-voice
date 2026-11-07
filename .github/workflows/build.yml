@@ -12,6 +12,18 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.11.1'
+      - name: Fetch engine deps
+        run: |
+          set -e
+          curl -sL -o /tmp/java_packages.zip https://github.com/VOICEVOX/voicevox_core/releases/download/0.16.4/java_packages.zip
+          unzip -qo /tmp/java_packages.zip -d third_party/maven/
+          test -f third_party/maven/jp/hiroshiba/voicevoxcore/voicevoxcore-android/0.16.4/voicevoxcore-android-0.16.4.aar
+          curl -sL -o /tmp/ort.tgz https://github.com/VOICEVOX/onnxruntime-builder/releases/download/voicevox_onnxruntime-1.23.2/voicevox_onnxruntime-android-arm64-1.23.2.tgz
+          mkdir -p app/src/main/jniLibs/arm64-v8a
+          tar xzf /tmp/ort.tgz -C /tmp
+          cp /tmp/voicevox_onnxruntime-android-arm64-1.23.2/lib/libvoicevox_onnxruntime.so app/src/main/jniLibs/arm64-v8a/
+          curl -sL -o app/libs/sherpa-onnx.aar https://github.com/k2-fsa/sherpa-onnx/releases/download/v1.13.8/sherpa-onnx-1.13.8.aar
+          ls -la app/libs/ app/src/main/jniLibs/arm64-v8a/
       - name: assembleRelease
         run: gradle :app:assembleRelease --no-daemon --console=plain
       - uses: actions/upload-artifact@v4
