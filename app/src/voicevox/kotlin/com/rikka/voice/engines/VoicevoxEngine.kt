@@ -67,25 +67,56 @@ class VoicevoxEngine(private val ctx: Context) : TtsEngine {
         ensureInit()
         styleToFile.clear()
         val out = mutableListOf<EngineVoice>()
-        val bad = mutableListOf<String>()
+        val notes = mutableListOf<String>()
         for (f in vvmFiles()) {
-            val chars = try { JSONArray(VvNative.metas(f.absolutePath)) } catch (t: Throwable) { bad += "${f.name}（${t.message}）"; continue }
-            for (i in 0 until chars.length()) {
-                val c = chars.getJSONObject(i)
-                val name = c.optString("name")
-                val styles = c.optJSONArray("styles") ?: continue
-                for (j in 0 until styles.length()) {
-                    val s = styles.getJSONObject(j)
-                    val type = s.optString("type", "talk")
-                    if (type.isNotEmpty() && type != "talk") continue   // 跳过唱歌用的风格
-                    val sid = s.getInt("id")
-                    if (styleToFile.containsKey(sid)) continue
-                    styleToFile[sid] = f
-                    out += EngineVoice("vv:$sid", name, s.optString("name"), "VOICEVOX:$name")
+            val raw = try { VvNative.metas(f.absolutePath) } catch (t: Throwable) { notes += "${f.name} 打不开：${t.message}"; continue }
+            // 原样存一份，方便排查（Android/data/com.rikka.voice/files/models/vvm/*.metas.json）
+            runCatching { File(f.parentFile, f.name + ".metas.json").writeText(raw) }
+            val found = parseMetas(raw)
+            var talk = 0
+            for (st in found) {
+                if (st.isSing) continue
+                talk++
+                if (styleToFile.containsKey(st.id)) continue
+                styleToFile[st.id] = f
+                out += EngineVoice("vv:${st.id}", st.character, st.style, "VOICEVOX:${st.character}")
+            }
+            if (talk == 0) notes += "${f.name} 里没读到朗读用的声音（共 ${found.size} 个风格）。元数据开头：" + raw.take(160)
+        }
+        if (out.isEmpty()) error(if (notes.isEmpty()) "声音包里没有可用的声音" else notes.joinToString("；"))
+        return out
+    }
+
+    private class MetaStyle(val id: Int, val character: String, val style: String, val isSing: Boolean)
+
+    /**
+     * 宽松解析 metas JSON：不依赖具体字段名（不同版本可能叫 styles / talk_styles 等），
+     * 只要“角色对象”下面有一个元素带整数 id 的数组，就当作它的风格列表。
+     */
+    private fun parseMetas(raw: String): List<MetaStyle> {
+        val root: Any = try { org.json.JSONTokener(raw).nextValue() } catch (t: Throwable) { return emptyList() }
+        val characters: JSONArray = when (root) {
+            is JSONArray -> root
+            is JSONObject -> root.keys().asSequence().map { root.opt(it) }.filterIsInstance<JSONArray>().firstOrNull() ?: JSONArray().put(root)
+            else -> return emptyList()
+        }
+        val out = mutableListOf<MetaStyle>()
+        for (i in 0 until characters.length()) {
+            val c = characters.optJSONObject(i) ?: continue
+            val name = c.optString("name").ifBlank { c.optString("speaker_name") }.ifBlank { "角色${i + 1}" }
+            for (key in c.keys()) {
+                val arr = c.optJSONArray(key) ?: continue
+                val sing = key.contains("sing", ignoreCase = true)
+                for (j in 0 until arr.length()) {
+                    val s = arr.optJSONObject(j) ?: continue
+                    if (!s.has("id")) continue
+                    val id = s.optInt("id", Int.MIN_VALUE).takeIf { it != Int.MIN_VALUE } ?: continue
+                    val type = s.optString("type").lowercase()
+                    val isSing = sing || type.contains("sing") || type.contains("frame")
+                    out += MetaStyle(id, name, s.optString("name"), isSing)
                 }
             }
         }
-        if (out.isEmpty() && bad.isNotEmpty()) error("声音包打不开：" + bad.joinToString("；") + "。文件可能没下载完整，删掉重新下载")
         return out
     }
 
