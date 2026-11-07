@@ -40,14 +40,23 @@ android {
         externalNativeBuild { cmake { path = file("src/piperplus/cpp/CMakeLists.txt") } }
     }
 
+    signingConfigs {
+        create("rikka") {
+            storeFile = file(System.getenv("RIKKA_KEYSTORE") ?: "../rikka-voice.p12")
+            storePassword = System.getenv("RIKKA_KEYSTORE_PASS") ?: "rikka-build"
+            keyAlias = System.getenv("RIKKA_KEY_ALIAS") ?: "rikka-voice"
+            keyPassword = System.getenv("RIKKA_KEY_PASS") ?: "rikka-build"
+        }
+    }
+
     buildTypes {
         release {
             // 不要开混淆：原生库按字段名读取对象。必须开的话 proguard-rules.pro 里的 keep 规则不能删
             isMinifyEnabled = false
             isShrinkResources = false
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
-            // 自用：直接用 debug 签名，muse 有正式签名可替换
-            signingConfig = signingConfigs.getByName("debug")
+            // 正式签名：仓库根目录的 rikka-voice.p12（首版即固定，后续版本可覆盖装）
+            signingConfig = signingConfigs.getByName("rikka")
         }
     }
 
