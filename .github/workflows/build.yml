@@ -17,12 +17,14 @@ jobs:
         run: |
           set -e
           mkdir -p app/src/main/jniLibs/arm64-v8a app/libs
-          curl -sL -o download https://github.com/VOICEVOX/voicevox_core/releases/download/0.16.4/download-linux-x64
-          chmod +x download
-          ./download --os android --cpu-arch arm64 --only c-api onnxruntime -o vv_android || (./download --help; exit 1)
-          find vv_android -type f | head -30
-          find vv_android -name "libvoicevox_core.so" -exec cp {} app/src/main/jniLibs/arm64-v8a/ \;
-          find vv_android -name "libvoicevox_onnxruntime.so*" -exec cp {} app/src/main/jniLibs/arm64-v8a/libvoicevox_onnxruntime.so \;
+          curl -sL -o /tmp/core.zip https://github.com/VOICEVOX/voicevox_core/releases/download/0.17.1/voicevox_core-android-arm64-0.17.1.zip
+          unzip -qo /tmp/core.zip -d /tmp/core
+          find /tmp/core -name "libvoicevox_core.so" -exec cp {} app/src/main/jniLibs/arm64-v8a/ \;
+          curl -sL -o /tmp/ort.tgz https://github.com/VOICEVOX/onnxruntime-builder/releases/download/voicevox_onnxruntime-1.23.2/voicevox_onnxruntime-android-arm64-1.23.2.tgz
+          tar -xzf /tmp/ort.tgz -C /tmp
+          find /tmp -name "libvoicevox_onnxruntime.so*" -exec cp {} app/src/main/jniLibs/arm64-v8a/libvoicevox_onnxruntime.so \;
+          test -f app/src/main/jniLibs/arm64-v8a/libvoicevox_core.so
+          test -f app/src/main/jniLibs/arm64-v8a/libvoicevox_onnxruntime.so
           curl -sL -o /tmp/sherpa.aar https://github.com/k2-fsa/sherpa-onnx/releases/download/v1.13.8/sherpa-onnx-1.13.8.aar
           cp /tmp/sherpa.aar app/libs/sherpa-onnx.aar
           ls -la app/src/main/jniLibs/arm64-v8a app/libs
