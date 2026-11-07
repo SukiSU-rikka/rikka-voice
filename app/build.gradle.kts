@@ -8,7 +8,6 @@ fun flag(name: String) = (project.findProperty(name) as String?)?.trim()?.toBool
 val useVoicevox = flag("rikka.engine.voicevox")
 val useSherpa = flag("rikka.engine.sherpa")
 val usePiper = flag("rikka.engine.piperplus")
-val voicevoxVersion = (project.findProperty("rikka.voicevox.version") as String?) ?: "0.16.4"
 
 android {
     namespace = "com.rikka.voice"
@@ -18,12 +17,22 @@ android {
         applicationId = "com.rikka.voice"
         minSdk = 26
         targetSdk = 35
-        versionCode = 3
-        versionName = "1.0.2"
+        versionCode = 4
+        versionName = "1.0.3"
         ndk { abiFilters += listOf("arm64-v8a") }
         buildConfigField("boolean", "HAS_VOICEVOX", useVoicevox.toString())
         buildConfigField("boolean", "HAS_SHERPA", useSherpa.toString())
         buildConfigField("boolean", "HAS_PIPERPLUS", usePiper.toString())
+        if (useVoicevox || usePiper) {
+            externalNativeBuild {
+                cmake {
+                    arguments += listOf(
+                        "-DRIKKA_VV=" + (if (useVoicevox) "ON" else "OFF"),
+                        "-DRIKKA_PIPER=" + (if (usePiper) "ON" else "OFF"),
+                    )
+                }
+            }
+        }
     }
 
     buildFeatures { compose = true; buildConfig = true }
@@ -36,8 +45,8 @@ android {
         }
     }
 
-    if (usePiper) {
-        externalNativeBuild { cmake { path = file("src/piperplus/cpp/CMakeLists.txt") } }
+    if (useVoicevox || usePiper) {
+        externalNativeBuild { cmake { path = file("src/native/CMakeLists.txt"); version = "3.22.1" } }
     }
 
     signingConfigs {
@@ -89,7 +98,7 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0")
     implementation("org.apache.commons:commons-compress:1.27.1")
 
-    if (useVoicevox) implementation("jp.hiroshiba.voicevoxcore:voicevoxcore-android:$voicevoxVersion")
+    // VOICEVOX：不再用 Java API / AAR；libvoicevox_core.so 与 libvoicevox_onnxruntime.so 放进 src/main/jniLibs/arm64-v8a/
     if (useSherpa) implementation(files("libs/sherpa-onnx.aar"))
     // piper-plus：libpiper_plus.so 等放进 src/main/jniLibs/arm64-v8a/（见构建说明）
 }
