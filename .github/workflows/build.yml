@@ -15,6 +15,7 @@ jobs:
       - name: Fetch engine deps
         run: |
           set -e
+          mkdir -p third_party/maven app/libs
           curl -sL -o /tmp/java_packages.zip https://github.com/VOICEVOX/voicevox_core/releases/download/0.16.4/java_packages.zip
           unzip -qo /tmp/java_packages.zip -d third_party/maven/
           test -f third_party/maven/jp/hiroshiba/voicevoxcore/voicevoxcore-android/0.16.4/voicevoxcore-android-0.16.4.aar
