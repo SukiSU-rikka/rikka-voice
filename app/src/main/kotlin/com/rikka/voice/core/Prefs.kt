@@ -14,14 +14,18 @@ data class RemoteConfig(
     val refAudio: String = "",
     val promptText: String = "",
     val promptLang: String = "ja",
+    val gptWeights: String = "",      // GPT-SoVITS 微调后的 GPT 权重（电脑上的路径，可空）
+    val sovitsWeights: String = "",   // GPT-SoVITS 微调后的 SoVITS 权重（电脑上的路径，可空）
 ) {
     fun toJson() = JSONObject().put("id", id).put("type", type).put("name", name).put("base", base)
         .put("refAudio", refAudio).put("promptText", promptText).put("promptLang", promptLang)
+        .put("gptWeights", gptWeights).put("sovitsWeights", sovitsWeights)
 
     companion object {
         fun from(o: JSONObject) = RemoteConfig(
             o.getString("id"), o.getString("type"), o.optString("name"), o.getString("base"),
             o.optString("refAudio"), o.optString("promptText"), o.optString("promptLang", "ja"),
+            o.optString("gptWeights"), o.optString("sovitsWeights"),
         )
     }
 }
@@ -49,6 +53,11 @@ class Prefs(ctx: Context) {
     var threads: Int
         get() = sp.getInt("threads", 4)
         set(v) = sp.edit().putInt("threads", v).apply()
+
+    /** 首页“试听”里自己输入的文字（以前不保存，切页面就没了） */
+    var tryText: String
+        get() = sp.getString("try_text", null) ?: "今日も、少しずつ日本語を読んでいこう。物語の続きが、待っているよ。"
+        set(v) = sp.edit().putString("try_text", v).apply()
 
     var systemSpeed: Float
         get() = sp.getFloat("sys_speed", 1f)

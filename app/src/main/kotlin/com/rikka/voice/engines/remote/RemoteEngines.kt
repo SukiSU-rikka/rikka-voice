@@ -113,7 +113,12 @@ private class GptSovitsRemote(cfg: RemoteConfig) : RemoteBase(cfg) {
         else -> EngineStatus(EngineState.READY, cfg.base)
     }
 
-    override fun loadVoices() = listOf(EngineVoice("gsv:0", cfg.name.ifBlank { "GPT-SoVITS" }, "参考音频音色"))
+    /** 连接时先切到你训练好的权重（api_v2 的 /set_gpt_weights 与 /set_sovits_weights），再列出声音。 */
+    override fun loadVoices(): List<EngineVoice> {
+        if (cfg.gptWeights.isNotBlank()) Http.get(Http.join(cfg.base, "/set_gpt_weights?weights_path=" + Http.enc(cfg.gptWeights)), 120_000)
+        if (cfg.sovitsWeights.isNotBlank()) Http.get(Http.join(cfg.base, "/set_sovits_weights?weights_path=" + Http.enc(cfg.sovitsWeights)), 120_000)
+        return listOf(EngineVoice("gsv:0", cfg.name.ifBlank { "GPT-SoVITS" }, if (cfg.sovitsWeights.isNotBlank()) "专属训练音色" else "参考音频音色"))
+    }
 
     override fun synthesize(text: String, voiceKey: String, params: SynthParams): Pcm {
         val body = JSONObject()

@@ -91,6 +91,8 @@ private fun RemoteForm(init: RemoteConfig, onDone: () -> Unit) {
     var base by remember { mutableStateOf(init.base) }
     var ref by remember { mutableStateOf(init.refAudio) }
     var prompt by remember { mutableStateOf(init.promptText) }
+    var gptW by remember { mutableStateOf(init.gptWeights) }
+    var sovitsW by remember { mutableStateOf(init.sovitsWeights) }
     val exists = Engines.prefs.remotes.any { it.id == init.id }
 
     SectionCard(if (exists) "编辑电脑引擎" else "添加电脑引擎") {
@@ -108,10 +110,13 @@ private fun RemoteForm(init: RemoteConfig, onDone: () -> Unit) {
             OutlinedTextField(ref, { ref = it }, Modifier.fillMaxWidth(), label = { Text("参考音频路径（电脑上的路径）") }, singleLine = true, shape = RoundedCornerShape(14.dp))
             OutlinedTextField(prompt, { prompt = it }, Modifier.fillMaxWidth(), label = { Text("参考音频里说的日语原文") }, shape = RoundedCornerShape(14.dp))
             Hint("GPT-SoVITS 会模仿参考音频的音色和语气：参考音频开心，读出来也偏开心。")
+            OutlinedTextField(gptW, { gptW = it }, Modifier.fillMaxWidth(), label = { Text("训练好的 GPT 权重 .ckpt（可空）") }, singleLine = true, shape = RoundedCornerShape(14.dp))
+            OutlinedTextField(sovitsW, { sovitsW = it }, Modifier.fillMaxWidth(), label = { Text("训练好的 SoVITS 权重 .pth（可空）") }, singleLine = true, shape = RoundedCornerShape(14.dp))
+            Hint("用自己的录音训练过（见“声音克隆指南”）就填这两项，例如 GPT_weights_v2/amakusa-e15.ckpt；只用参考音频就留空。")
         }
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             Button(onClick = {
-                val c = RemoteConfig(init.id, type, name.trim(), base.trimEnd('/'), ref.trim(), prompt.trim(), "ja")
+                val c = RemoteConfig(init.id, type, name.trim(), base.trimEnd('/'), ref.trim(), prompt.trim(), "ja", gptW.trim(), sovitsW.trim())
                 Engines.prefs.remotes = Engines.prefs.remotes.filter { it.id != c.id } + c
                 Engines.rebuild(); Engines.refresh("remote:" + c.id)
                 onDone()

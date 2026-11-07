@@ -125,7 +125,7 @@ fun HomeScreen(modifier: Modifier, goVoices: () -> Unit) {
 @Composable
 private fun TryCard(defaultId: Int) {
     val voices by Engines.voices.collectAsStateWithLifecycle()
-    var text by remember { mutableStateOf("今日も、少しずつ日本語を読んでいこう。物語の続きが、待っているよ。") }
+    var text by remember { mutableStateOf(Engines.prefs.tryText) }
     var voiceId by remember(defaultId) { mutableIntStateOf(defaultId) }
     var speed by remember { mutableFloatStateOf(1f) }
     var status by remember { mutableStateOf("") }
@@ -134,7 +134,7 @@ private fun TryCard(defaultId: Int) {
 
     SectionCard("试听") {
         VoicePicker(voices, voiceId, "声音") { voiceId = it.id }
-        OutlinedTextField(text, { text = it }, Modifier.fillMaxWidth(), minLines = 2, shape = RoundedCornerShape(14.dp), label = { Text("日语文本") })
+        OutlinedTextField(text, { text = it; Engines.prefs.tryText = it }, Modifier.fillMaxWidth(), minLines = 2, shape = RoundedCornerShape(14.dp), label = { Text("日语文本（会自动保存）") })
         Text("语速 ${"%.2f".format(speed)}×", style = MaterialTheme.typography.bodySmall)
         Slider(speed, { speed = it }, valueRange = .6f..1.6f)
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {

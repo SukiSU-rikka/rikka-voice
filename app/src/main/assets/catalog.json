@@ -11,16 +11,108 @@
     "urlPattern": "https://github.com/VOICEVOX/voicevox_vvm/releases/latest/download/{file}",
     "terms": "https://voicevox.hiroshiba.jp/",
     "items": [
-      { "file": "0.vvm",  "chars": "四国めたん・ずんだもん・春日部つむぎ・雨晴はう" },
-      { "file": "3.vvm",  "chars": "波音リツ 等" },
-      { "file": "4.vvm",  "chars": "玄野武宏 等" },
-      { "file": "6.vvm",  "chars": "No.7（含“读み聞かせ”朗读风格）等" },
-      { "file": "11.vvm", "chars": "櫻歌ミコ 等" },
-      { "file": "13.vvm", "chars": "春歌ナナ・猫使アル 等" },
-      { "file": "14.vvm", "chars": "栗田まろん・満別花丸・琴詠ニア 等" },
-      { "file": "15.vvm", "chars": "小夜/SAYO・ずんだもん（追加风格）等" },
-      { "file": "21.vvm", "chars": "東北イタコ・猫使アル（追加风格）等" }
-    ]
+      {
+        "file": "0.vvm",
+        "chars": "四国めたん・ずんだもん・春日部つむぎ・雨晴はう"
+      },
+      {
+        "file": "1.vvm",
+        "chars": "更多角色（下载后显示准确名单）"
+      },
+      {
+        "file": "2.vvm",
+        "chars": "更多角色（下载后显示准确名单）"
+      },
+      {
+        "file": "3.vvm",
+        "chars": "波音リツ 等"
+      },
+      {
+        "file": "4.vvm",
+        "chars": "玄野武宏 等"
+      },
+      {
+        "file": "5.vvm",
+        "chars": "四国めたん・ずんだもん（ささやき等追加风格）"
+      },
+      {
+        "file": "6.vvm",
+        "chars": "No.7（含“読み聞かせ”朗读风格）等"
+      },
+      {
+        "file": "7.vvm",
+        "chars": "更多角色（下载后显示准确名单）"
+      },
+      {
+        "file": "8.vvm",
+        "chars": "更多角色（下载后显示准确名单）"
+      },
+      {
+        "file": "9.vvm",
+        "chars": "更多角色（下载后显示准确名单）"
+      },
+      {
+        "file": "10.vvm",
+        "chars": "玄野武宏（追加风格）・ちび式じい 等"
+      },
+      {
+        "file": "11.vvm",
+        "chars": "櫻歌ミコ 等"
+      },
+      {
+        "file": "12.vvm",
+        "chars": "麒ヶ島宗麟 等"
+      },
+      {
+        "file": "13.vvm",
+        "chars": "春歌ナナ・猫使アル 等"
+      },
+      {
+        "file": "14.vvm",
+        "chars": "栗田まろん・満別花丸・琴詠ニア 等"
+      },
+      {
+        "file": "15.vvm",
+        "chars": "小夜/SAYO・ずんだもん（追加风格）等"
+      },
+      {
+        "file": "16.vvm",
+        "chars": "更多角色（下载后显示准确名单）"
+      },
+      {
+        "file": "17.vvm",
+        "chars": "更多角色（下载后显示准确名单）"
+      },
+      {
+        "file": "18.vvm",
+        "chars": "更多角色（下载后显示准确名单）"
+      },
+      {
+        "file": "19.vvm",
+        "chars": "更多角色（下载后显示准确名单）"
+      },
+      {
+        "file": "20.vvm",
+        "chars": "更多角色（下载后显示准确名单）"
+      },
+      {
+        "file": "21.vvm",
+        "chars": "東北イタコ・猫使アル（追加风格）等"
+      },
+      {
+        "file": "22.vvm",
+        "chars": "あんこもん 等"
+      },
+      {
+        "file": "23.vvm",
+        "chars": "あんこもん（追加风格）等"
+      },
+      {
+        "file": "24.vvm",
+        "chars": "里石ユカ 等"
+      }
+    ],
+    "note": "每个声音包含 1～4 个角色及其全部风格（开心、生气、难过、小声等），广播剧模式会自动用到这些风格。"
   },
   "supertonic": {
     "title": "Supertonic 3（31 语种，含日语）",
