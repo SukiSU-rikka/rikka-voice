@@ -5,15 +5,28 @@ import java.nio.ByteOrder
 import kotlin.math.roundToInt
 
 object Wav {
+    /** 标准 PCM WAV；有时间轴时额外附一个 "rktm" 块（JSON），普通播放器会忽略它。 */
     fun encode(pcm: Pcm): ByteArray {
         val dataLen = pcm.samples.size * 2
-        val buf = ByteBuffer.allocate(44 + dataLen).order(ByteOrder.LITTLE_ENDIAN)
-        buf.put("RIFF".toByteArray()); buf.putInt(36 + dataLen); buf.put("WAVE".toByteArray())
+        val tm = pcm.marks?.let { marksJson(it).toByteArray(Charsets.UTF_8) }
+        val tmLen = tm?.let { 8 + it.size + (it.size and 1) } ?: 0
+        val buf = ByteBuffer.allocate(44 + dataLen + tmLen).order(ByteOrder.LITTLE_ENDIAN)
+        buf.put("RIFF".toByteArray()); buf.putInt(36 + dataLen + tmLen); buf.put("WAVE".toByteArray())
         buf.put("fmt ".toByteArray()); buf.putInt(16); buf.putShort(1); buf.putShort(1)
         buf.putInt(pcm.sampleRate); buf.putInt(pcm.sampleRate * 2); buf.putShort(2); buf.putShort(16)
         buf.put("data".toByteArray()); buf.putInt(dataLen)
         for (s in pcm.samples) buf.putShort(s)
+        if (tm != null) {
+            buf.put("rktm".toByteArray()); buf.putInt(tm.size); buf.put(tm)
+            if (tm.size and 1 == 1) buf.put(0)
+        }
         return buf.array()
+    }
+
+    private fun marksJson(marks: List<Mark>): String {
+        val a = org.json.JSONArray()
+        for (m in marks) a.put(org.json.JSONArray().put(m.text).put(Math.round(m.start * 1000) / 1000.0).put(Math.round(m.end * 1000) / 1000.0).put(if (m.pause) 1 else 0))
+        return a.toString()
     }
 
     /** 解析常见 WAV：PCM 8/16/24/32 位、32 位浮点，多声道会混成单声道。 */
@@ -66,7 +79,7 @@ object Wav {
 
     fun scaleVolume(pcm: Pcm, volume: Float): Pcm {
         if (volume in 0.995f..1.005f) return pcm
-        return Pcm(ShortArray(pcm.samples.size) { toShort(pcm.samples[it] / 32768.0 * volume) }, pcm.sampleRate)
+        return Pcm(ShortArray(pcm.samples.size) { toShort(pcm.samples[it] / 32768.0 * volume) }, pcm.sampleRate, pcm.marks)
     }
 
     fun concat(parts: List<Pcm>, gapMs: Int = 120): Pcm {

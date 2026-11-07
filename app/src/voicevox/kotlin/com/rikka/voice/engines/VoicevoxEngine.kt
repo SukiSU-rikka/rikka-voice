@@ -141,7 +141,35 @@ class VoicevoxEngine(private val ctx: Context) : TtsEngine {
         q.put("pitchScale", params.pitch.toDouble())
         q.put("intonationScale", params.intonation.toDouble())
         q.put("volumeScale", params.volume.toDouble())
-        return Wav.decode(VvNative.synthesis(q.toString(), styleId))
+        val pcm = Wav.decode(VvNative.synthesis(q.toString(), styleId))
+        return Pcm(pcm.samples, pcm.sampleRate, runCatching { marksOf(q) }.getOrNull())
+    }
+
+    /** 按 AudioQuery 里每个音拍的长度算出时间轴（与 VOICEVOX 合成用的是同一组数值）。 */
+    private fun marksOf(q: JSONObject): List<com.rikka.voice.core.Mark> {
+        val speed = q.optDouble("speedScale", 1.0).takeIf { it > 0 } ?: 1.0
+        val pauseFixed = if (q.has("pauseLength") && !q.isNull("pauseLength")) q.optDouble("pauseLength") else Double.NaN
+        val pauseScale = q.optDouble("pauseLengthScale", 1.0)
+        var t = q.optDouble("prePhonemeLength", 0.1) / speed
+        val out = mutableListOf<com.rikka.voice.core.Mark>()
+        val phrases = q.optJSONArray("accent_phrases") ?: return out
+        for (i in 0 until phrases.length()) {
+            val ph = phrases.getJSONObject(i)
+            val moras = ph.optJSONArray("moras") ?: continue
+            for (j in 0 until moras.length()) {
+                val m = moras.getJSONObject(j)
+                val d = (if (m.isNull("consonant_length")) 0.0 else m.optDouble("consonant_length", 0.0)) + m.optDouble("vowel_length", 0.0)
+                out += com.rikka.voice.core.Mark(m.optString("text"), t, t + d / speed, false)
+                t += d / speed
+            }
+            val pm = ph.optJSONObject("pause_mora")
+            if (pm != null) {
+                val d = if (!pauseFixed.isNaN()) pauseFixed else pm.optDouble("vowel_length", 0.0) * pauseScale
+                out += com.rikka.voice.core.Mark(pm.optString("text", "、"), t, t + d / speed, true)
+                t += d / speed
+            }
+        }
+        return out
     }
 
     override fun release() {

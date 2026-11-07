@@ -1,7 +1,10 @@
 package com.rikka.voice.core
 
-/** 一段 16-bit 单声道 PCM。所有引擎最终都转换成这个格式。 */
-class Pcm(val samples: ShortArray, val sampleRate: Int) {
+/** 一个音拍（或停顿）在音频里的起止时间，单位秒。用于六花逐词高亮。 */
+class Mark(val text: String, val start: Double, val end: Double, val pause: Boolean)
+
+/** 一段 16-bit 单声道 PCM。所有引擎最终都转换成这个格式；marks 只有能给出时间轴的引擎（VOICEVOX）才有。 */
+class Pcm(val samples: ShortArray, val sampleRate: Int, val marks: List<Mark>? = null) {
     val seconds: Double get() = samples.size.toDouble() / sampleRate
 }
 
