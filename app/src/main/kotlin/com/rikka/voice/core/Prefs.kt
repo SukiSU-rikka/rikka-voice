@@ -51,7 +51,7 @@ class Prefs(ctx: Context) {
         set(v) = sp.edit().putInt("default_voice", v).apply()
 
     var threads: Int
-        get() = sp.getInt("threads", 4)
+        get() = sp.getInt("threads", 2)
         set(v) = sp.edit().putInt("threads", v).apply()
 
     /** 首页“试听”里自己输入的文字（以前不保存，切页面就没了） */

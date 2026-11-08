@@ -40,7 +40,7 @@ fun AboutScreen(modifier: Modifier) {
             Slider(threads, { threads = it }, valueRange = 1f..8f, steps = 6, onValueChangeFinished = {
                 Engines.prefs.threads = threads.toInt(); Engines.refresh(release = true)
             })
-            Hint("线程越多合成越快，但更耗电发热。骁龙 8 系手机 4 线程比较均衡。")
+            Hint("线程越多合成越快，但更耗电发热，和播放抢 CPU 时可能出现杂音。默认 2 线程，合成速度已经远快于朗读速度。")
             Text("系统朗读语速倍率：${"%.2f".format(sysSpeed)}×", style = MaterialTheme.typography.bodyMedium)
             Slider(sysSpeed, { sysSpeed = it }, valueRange = .6f..1.6f, onValueChangeFinished = { Engines.prefs.systemSpeed = sysSpeed })
             OutlinedButton(onClick = { Engines.clearCache() }) { Text("清空语音缓存") }
